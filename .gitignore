@@ -1,0 +1,5 @@
+Makefile.target
+obj_sky/*
+*.sky
+*.a
+*.map

@@ -45,6 +45,9 @@
 #include "net/mac/tsch/tsch.h"
 #include "dev/sht11/sht11-sensor.h"
 
+#define TSCH_LOG_LEVEL 0
+#define DEBUG 0
+
 const linkaddr_t coordinator_addr = {{1, 0}};
 const linkaddr_t destination_addr = {{1, 0}};
 
@@ -59,29 +62,14 @@ PROCESS(unicast_test_process, "Rime Node");
 AUTOSTART_PROCESSES(&unicast_test_process);
 
 /*---------------------------------------------------------------------------*/
-static void get_humidity(struct sensor_info *info)
-{
-  int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
-  int humidity = -4 + 0.0405*analogHum + (-2.8 * 10^-6)*(analogHum^2);
-  info->hum = (info->temp - 25) * (0.01 + 0.00008*analogHum) + humidity;
-  /*
-      s = (((0.0405 * val) - 4) + ((-2.8 * 0.000001) * (pow(val, 2))));
-      dec = s;
-      frac = s - dec;
-      printf("Humidity=%d.%02u %% (%d)\n", dec, (unsigned int)(frac * 100), val);
-*/
-}
-
-/*---------------------------------------------------------------------------*/
-static void get_temperature(struct sensor_info *info)
+static void get_sensor_information(struct sensor_info *info)
 {
   int analogTemp = sht11_sensor.value(SHT11_SENSOR_TEMP);
-  info->temp = -39.600+0.01*analogTemp;
-  
-  /*s = ((0.01 * val) - 39.60);
-      dec = s;
-      frac = s - dec;
-      printf("\nTemperature=%d.%02u C (%d)\n", dec, (unsigned int)(frac * 100), val);*/
+  info->temp = -39.600 + 0.01 * analogTemp;
+
+  int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
+  int humidity = -4 + 0.0405 * analogHum + (-2.8 * 1000000) * (analogHum ^ 2);
+  info->hum = (info->temp - 25) * (0.01 + 0.00008 * analogHum) + humidity;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -122,6 +110,7 @@ PROCESS_THREAD(unicast_test_process, ev, data)
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     struct sensor_info info;
+    get_sensor_information(&info);
     get_temperature(&info);
     get_humidity(&info);
 

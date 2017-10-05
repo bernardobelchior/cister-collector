@@ -6,7 +6,8 @@
 In the terminal window, go to the cister-collector folder.
 Run the following line:
 
-```make TARGET=sky savetarget NODEID=0x0001 MOTES=/dev/ttyUSB0 cister-collector.upload login
+```
+make TARGET=sky savetarget NODEID=0x0001 MOTES=/dev/ttyUSB0 cister-collector.upload login
 ```
 * `TARGET=sky` The target plattform. We are going to use the Tmote Sky
 * `savetarget` Saves the target for any future compilations

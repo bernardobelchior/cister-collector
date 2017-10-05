@@ -61,7 +61,9 @@ AUTOSTART_PROCESSES(&unicast_test_process);
 /*---------------------------------------------------------------------------*/
 static void get_humidity(struct sensor_info *info)
 {
-  info->hum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
+  int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
+  int humidity = -4 + 0.0405*analogHum + (-2.8 * 10^-6)*(analogHum^2);
+  info->hum = (info->temp - 25) * (0.01 + 0.00008*analogHum) + humidity;
   /*
       s = (((0.0405 * val) - 4) + ((-2.8 * 0.000001) * (pow(val, 2))));
       dec = s;
@@ -73,7 +75,9 @@ static void get_humidity(struct sensor_info *info)
 /*---------------------------------------------------------------------------*/
 static void get_temperature(struct sensor_info *info)
 {
-  info->temp = sht11_sensor.value(SHT11_SENSOR_TEMP);
+  int analogTemp = sht11_sensor.value(SHT11_SENSOR_TEMP);
+  info->temp = -39.600+0.01*analogTemp;
+  
   /*s = ((0.01 * val) - 39.60);
       dec = s;
       frac = s - dec;

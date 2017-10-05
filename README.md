@@ -4,6 +4,7 @@
 # Run
 
 In the terminal window, go to the cister-collector folder.
+
 Run the following line:
 
 ```

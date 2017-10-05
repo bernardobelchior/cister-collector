@@ -3,7 +3,7 @@
 
 # Run
 
-In the terminal window, go to the cister-collector folder.
+In the terminal window, go to the cister-collector folder.   <br /> 
 Run the following line:
 
 ```

@@ -44,6 +44,7 @@
 #include "net/rime/rime.h"
 #include "net/mac/tsch/tsch.h"
 #include "dev/sht11/sht11-sensor.h"
+#include <math.h>
 
 #define TSCH_LOG_LEVEL 0
 #define DEBUG 0
@@ -68,7 +69,7 @@ static void get_sensor_information(struct sensor_info *info)
   info->temp = -39.600 + 0.01 * analogTemp;
 
   int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
-  int humidity = -4 + 0.0405 * analogHum + (-2.8 * 1000000) * (analogHum ^ 2);
+  int humidity = -4 + 0.0405 * analogHum + (-2.8 * pow(10, -6)) * (pow(analogHum,2));
   info->hum = (info->temp - 25) * (0.01 + 0.00008 * analogHum) + humidity;
 }
 

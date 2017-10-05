@@ -111,8 +111,6 @@ PROCESS_THREAD(unicast_test_process, ev, data)
 
     struct sensor_info info;
     get_sensor_information(&info);
-    get_temperature(&info);
-    get_humidity(&info);
 
     packetbuf_copyfrom(&info, sizeof(info));
 

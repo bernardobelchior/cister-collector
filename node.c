@@ -40,26 +40,27 @@
 
 #include <stdio.h>
 #include "contiki-conf.h"
+#include "sys/clock.h"
+#include "sys/node-id.h"
 #include "net/netstack.h"
 #include "net/rime/rime.h"
 #include "net/mac/tsch/tsch.h"
 #include "dev/sht11/sht11-sensor.h"
 #include <math.h>
 
-#define TSCH_LOG_LEVEL 0
-#define DEBUG 0
-
 const linkaddr_t coordinator_addr = {{1, 0}};
 const linkaddr_t destination_addr = {{1, 0}};
 
 struct sensor_info
 {
+  int id;
+  unsigned long timestamp;
   int temp;
   int hum;
 };
 
 /*---------------------------------------------------------------------------*/
-PROCESS(unicast_test_process, "Rime Node");
+PROCESS(unicast_test_process, "CISTER Collector");
 AUTOSTART_PROCESSES(&unicast_test_process);
 
 /*---------------------------------------------------------------------------*/
@@ -71,6 +72,8 @@ static void get_sensor_information(struct sensor_info *info)
   int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
   int humidity = -4 + 0.0405 * analogHum + (-2.8 * pow(10, -6)) * (pow(analogHum,2));
   info->hum = (info->temp - 25) * (0.01 + 0.00008 * analogHum) + humidity;
+
+  info->timestamp = clock_seconds();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -78,15 +81,22 @@ static void
 recv_uc(struct unicast_conn *c, const linkaddr_t *from)
 {
   struct sensor_info *info = (struct sensor_info *)packetbuf_dataptr();
+
+#if DEBUG
   printf("Received from %u.%u: Temp: %d Hum: %d\n",
          from->u8[0], from->u8[1], info->temp, info->hum);
+#else  /* DEBUG */
+  printf("Sensor: %d %lu %d %d", info->id, info->timestamp, info->temp, info->hum);
+#endif /* DEBUG */
 }
 /*---------------------------------------------------------------------------*/
 static void
 sent_uc(struct unicast_conn *ptr, int status, int num_tx)
 {
+#if DEBUG
   printf("Message sent, status %u, num_tx %u\n",
          status, num_tx);
+#endif /* DEBUG */
 }
 
 static const struct unicast_callbacks unicast_callbacks = {recv_uc, sent_uc};
@@ -100,9 +110,12 @@ PROCESS_THREAD(unicast_test_process, ev, data)
   tsch_set_coordinator(linkaddr_cmp(&coordinator_addr, &linkaddr_node_addr));
   NETSTACK_MAC.on();
 
+  clock_init();
   SENSORS_ACTIVATE(sht11_sensor);
   unicast_open(&uc, 146, &unicast_callbacks);
 
+  struct sensor_info info;
+  info.id = node_id;
   while (1)
   {
     static struct etimer et;
@@ -110,7 +123,6 @@ PROCESS_THREAD(unicast_test_process, ev, data)
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-    struct sensor_info info;
     get_sensor_information(&info);
 
     packetbuf_copyfrom(&info, sizeof(info));

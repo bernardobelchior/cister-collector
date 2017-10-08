@@ -70,7 +70,7 @@ static void get_sensor_information(struct sensor_info *info)
   info->temp = -39.600 + 0.01 * analogTemp;
 
   int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
-  int humidity = -4 + 0.0405 * analogHum + (-2.8 * pow(10, -6)) * (pow(analogHum,2));
+  int humidity = -4 + 0.0405 * analogHum + (-2.8 * pow(10, -6)) * (pow(analogHum, 2));
   info->hum = (info->temp - 25) * (0.01 + 0.00008 * analogHum) + humidity;
 
   info->timestamp = clock_seconds();
@@ -86,7 +86,7 @@ recv_uc(struct unicast_conn *c, const linkaddr_t *from)
   printf("Received from %u.%u: Temp: %d Hum: %d\n",
          from->u8[0], from->u8[1], info->temp, info->hum);
 #else  /* DEBUG */
-  printf("Sensor: %d %lu %d %d", info->id, info->timestamp, info->temp, info->hum);
+  printf("Sensor: %d %lu %d %d\n", info->id, info->timestamp, info->temp, info->hum);
 #endif /* DEBUG */
 }
 /*---------------------------------------------------------------------------*/

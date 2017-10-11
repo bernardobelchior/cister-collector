@@ -1,5 +1,5 @@
 CONTIKI=../..
-CONTIKI_PROJECT = node
+CONTIKI_PROJECT = cister_collector
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
 CONTIKI_WITH_RIME = 1

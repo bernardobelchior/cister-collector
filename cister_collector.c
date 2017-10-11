@@ -54,8 +54,8 @@ struct sensor_info
 {
   int id;
   unsigned long timestamp;
-  int temp;
-  int hum;
+  float temp;
+  float hum;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -85,7 +85,7 @@ recv_uc(struct unicast_conn *c, const linkaddr_t *from)
   printf("Received from %u.%u: Temp: %d Hum: %d\n",
          from->u8[0], from->u8[1], info->temp, info->hum);
 #else  /* DEBUG */
-  printf("Sensor: %d %lu %d %d\n", info->id, info->timestamp, info->temp, info->hum);
+  printf("Sensor: %d %lu %d.%d %d.%d\n", info.id, info.timestamp, (int)info.temp, (int)((info.temp - (int)info.temp) * 100), (int)info.hum, (int)((info.hum - (int)info.hum) * 100));
 #endif /* DEBUG */
 }
 /*---------------------------------------------------------------------------*/

@@ -46,7 +46,6 @@
 #include "net/rime/rime.h"
 #include "net/mac/tsch/tsch.h"
 #include "dev/sht11/sht11-sensor.h"
-#include <math.h>
 
 const linkaddr_t coordinator_addr = {{1, 0}};
 const linkaddr_t destination_addr = {{1, 0}};
@@ -70,7 +69,7 @@ static void get_sensor_information(struct sensor_info *info)
   info->temp = -39.600 + 0.01 * analogTemp;
 
   int analogHum = sht11_sensor.value(SHT11_SENSOR_HUMIDITY);
-  int humidity = -4 + 0.0405 * analogHum + (-2.8 * pow(10, -6)) * (pow(analogHum, 2));
+  int humidity = -4 + 0.0405 * analogHum + (-2.8 * 0.000001) * analogHum * analogHum;
   info->hum = (info->temp - 25) * (0.01 + 0.00008 * analogHum) + humidity;
 
   info->timestamp = clock_seconds();
@@ -108,7 +107,7 @@ PROCESS_THREAD(unicast_test_process, ev, data)
   PROCESS_BEGIN();
 
   tsch_set_coordinator(linkaddr_cmp(&coordinator_addr, &linkaddr_node_addr));
-  NETSTACK_MAC.on();
+  //NETSTACK_MAC.on();
 
   clock_init();
   SENSORS_ACTIVATE(sht11_sensor);

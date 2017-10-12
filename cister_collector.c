@@ -40,12 +40,13 @@
 
 #include <stdio.h>
 #include "contiki-conf.h"
-#include "sys/clock.h"
-#include "sys/node-id.h"
 #include "net/netstack.h"
 #include "net/rime/rime.h"
 #include "net/mac/tsch/tsch.h"
+
 #include "dev/sht11/sht11-sensor.h"
+#include "sys/clock.h"
+#include "sys/node-id.h"
 
 const linkaddr_t coordinator_addr = {{1, 0}};
 const linkaddr_t destination_addr = {{1, 0}};
@@ -85,7 +86,7 @@ recv_uc(struct unicast_conn *c, const linkaddr_t *from)
   printf("Received from %u.%u: Temp: %d Hum: %d\n",
          from->u8[0], from->u8[1], info->temp, info->hum);
 #else  /* DEBUG */
-  printf("Sensor: %d %lu %d.%d %d.%d\n", info.id, info.timestamp, (int)info.temp, (int)((info.temp - (int)info.temp) * 100), (int)info.hum, (int)((info.hum - (int)info.hum) * 100));
+  printf("Sensor: %d %lu %d.%d %d.%d\n", info->id, info->timestamp, (int)info->temp, (int)((info->temp - (int)info->temp) * 100), (int)info->hum, (int)((info->hum - (int)info->hum) * 100));
 #endif /* DEBUG */
 }
 /*---------------------------------------------------------------------------*/
@@ -107,10 +108,9 @@ PROCESS_THREAD(unicast_test_process, ev, data)
   PROCESS_BEGIN();
 
   tsch_set_coordinator(linkaddr_cmp(&coordinator_addr, &linkaddr_node_addr));
-  //NETSTACK_MAC.on();
+  NETSTACK_MAC.on();
 
   clock_init();
-  SENSORS_ACTIVATE(sht11_sensor);
   unicast_open(&uc, 146, &unicast_callbacks);
 
   struct sensor_info info;
@@ -122,7 +122,9 @@ PROCESS_THREAD(unicast_test_process, ev, data)
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
+    SENSORS_ACTIVATE(sht11_sensor);
     get_sensor_information(&info);
+    SENSORS_DEACTIVATE(sht11_sensor);
 
     packetbuf_copyfrom(&info, sizeof(info));
 

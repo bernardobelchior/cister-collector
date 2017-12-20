@@ -1,0 +1,2 @@
+CONTIKI_SOURCEFILES += tsch.c tsch-slot-operation.c tsch-queue.c tsch-packet.c tsch-schedule.c tsch-rpl.c tsch-adaptive-timesync.c
+#tsch-log.c 
